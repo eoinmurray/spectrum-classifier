@@ -92,7 +92,14 @@ def main(input_file: str, output_dir: str, prominence: float = 0.1, max_peaks: i
     print("df of training.json:")
     print(peak_df)
     
-    training_df = df[["id", "qd_id", "target_label", "power", "rotator", "skew"]].join(peak_df)
+    training_df = df[[
+      "id", 
+      "qd_id", 
+      "target_label", 
+      # "power", 
+      # "rotator", 
+      "skew"
+    ]].join(peak_df)
 
     training_df.to_json(os.path.join(output_dir, "training.json"), orient="records", indent=4)
     print(f"Saved {len(training_df)} spectra to training.json")

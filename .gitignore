@@ -5,9 +5,9 @@
 node_modules/
 yarn-error.log
 *.pth
+
 data/
-data
-data/model
+
 ipynb_checkpoints
 metabase*
 .venv
@@ -18,7 +18,3 @@ lightning_logs
 __pycache__
 *.pth
 *.npz
-data/converted/
-data/images/
-data/extracted/
-data/stats/

@@ -20,18 +20,17 @@ def process_files(files, limit, spectrum_type, shape=(23, 2046), max_col=2044):
         # label = generate_random_id()
 
         for index, row in enumerate(labfile.intensity):
-            
-            truncated_row = row[:max_col]
-            uid = generate_random_id()
-            args = {
-                "z": truncated_row,
-                "id": uid,
-                "qd_id": qd_id,
-                "target_label": label
-            }
-            args["power" if spectrum_type == "power" else "rotator"] = index
-            spec = Spectrum(**args)
-            spectrum_array.append(spec)
+          truncated_row = row[:max_col]
+          uid = generate_random_id()
+          args = {
+              "z": truncated_row,
+              "id": uid,
+              "qd_id": qd_id,
+              "target_label": label
+          }
+          args["power" if spectrum_type == "power" else "rotator"] = index
+          spec = Spectrum(**args)
+          spectrum_array.append(spec)
     return spectrum_array
 
 def main(input_dir: str, output_file: str, limit: int):
