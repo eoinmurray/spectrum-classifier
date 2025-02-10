@@ -1,105 +1,85 @@
+#!/usr/bin/env python3
 import os
+import sys
+import argparse
 import pandas as pd
 import numpy as np
 from scipy.signal import find_peaks
-from type_defs import Peak
-import pywt
-import pywt.data
+from typing import List, Dict
 
-def extract_peaks(z, prominence, max_peaks=15):
-    if z.size != 2044:
-        raise ValueError("z must have 2044 points.")
+def extract_peaks(z: np.ndarray, energy_values: np.ndarray, prominence: float, max_peaks: int = 15) -> List[Dict[str, float]]:
+    assert(z.size == energy_values.size)
+    x = energy_values
     
-    x = np.arange(z.size)
-    percentage_prominence = prominence * z.max()
-    peak_idxs, _ = find_peaks(z, prominence=percentage_prominence)
-    
-    if not peak_idxs.size:
-        return [Peak(center=0, amplitude=0, fwhm=0).to_dict()] * max_peaks
+    perc_prom = prominence * z.max()
+    idxs, _ = find_peaks(z, prominence=perc_prom)
+    if not idxs.size:
+        return [{'center': 0, 'amplitude': 0, 'fwhm': 0}] * max_peaks
 
     peaks = []
-    for idx in peak_idxs:
-        amplitude = z[idx]
-        half_max = amplitude / 2
-        
-        if idx > 0:
-            left_x = np.interp(half_max, z[:idx+1][::-1], x[:idx+1][::-1])
-        else:
-            left_x = x[idx]
-
-        if idx < len(z) - 1:
-            right_x = np.interp(half_max, z[idx:], x[idx:])
-        else:
-            right_x = x[idx]
-        fwhm = right_x - left_x
-        
-        peaks.append(Peak(center=x[idx], amplitude=amplitude, fwhm=fwhm).to_dict())
-
+    for idx in idxs:
+        amplitude = float(z[idx])
+        # half_max = amplitude / 2
+        # left_x = np.interp(half_max, z[:idx+1][::-1], x[:idx+1][::-1]) if idx > 0 else x[idx]
+        # right_x = np.interp(half_max, z[idx:], x[idx:]) if idx < len(z) - 1 else x[idx]
+        peaks.append({
+          'center': x[idx], 
+          'amplitude': amplitude, 
+          # 'fwhm': float(right_x - left_x)
+        })
     return sorted(peaks, key=lambda p: p['amplitude'], reverse=True)[:max_peaks]
 
-def calculate_skew(peaks):
-    max_peak = max(peaks, key=lambda p: p['amplitude'])
-    left_count = sum(p['center'] < max_peak['center'] for p in peaks)
-    right_count = sum(p['center'] > max_peak['center'] for p in peaks)
+def flatten_peak_features(row: pd.Series, max_peaks: int = 15, features: List[str] = ["center", "amplitude"]) -> List[float]:
+    """Flatten peak features from a row into a single list."""
+    feats = [peak.get(f, 0) for peak in row["peaks"][:max_peaks] for f in features]
+    padding_length = max_peaks * len(features) - len(feats)
+    if padding_length > 0:
+        feats.extend([0] * padding_length)
+    return feats
 
-    skew = 0
-    if abs(left_count - right_count) > 1:
-        skew = -1 if left_count > right_count else 1
-
-    return skew
-
-def flatten_peak_features(row, max_peaks=15, features=["center", "amplitude", "fwhm"]):
-    processed_peaks = []
-    for peak in row["peaks"][:max_peaks]:
-        processed_peaks.extend([peak.get(feature, 0) for feature in features])
-    processed_peaks.extend([0] * (max_peaks * len(features) - len(processed_peaks)))
-    return processed_peaks
-
-def smooth_z(z):
-    cA, cD = pywt.dwt(z, 'db1')  # Decompose using the wavelet transform
-    cD = np.zeros_like(cD)       # Zero out detail coefficients to remove noise
-    smoothed = pywt.idwt(cA, cD, 'db1')  # Reconstruct the signal
-    return smoothed
-
-def main(input_file: str, output_dir: str, prominence: float = 0.1, max_peaks: int = 15):
+def main(input_file: str, output_file: str, prominence: float = 0.1, max_peaks: int = 15, smooth: bool = False) -> None:
+    """Process a JSON file of spectra, extract peak features, and save the training data."""
     if not os.path.isfile(input_file):
-      return print(f"Input file {input_file} does not exist.")
-  
-    os.makedirs(output_dir, exist_ok=True)
-    df = pd.read_json(input_file)
+        sys.exit(f"Input file {input_file} does not exist.")
+
+    try:
+        df = pd.read_json(input_file)
+    except ValueError as e:
+        sys.exit(f"Error reading JSON: {e}")
+
+    print(f"Processing {len(df)} spectra from {input_file}")
+
+    df['intensity'] = df['intensity'].map(np.array)
+    df['energy_values'] = df['energy_values'].map(np.array)
+
+    df['peaks'] = df.apply(lambda row: extract_peaks(row['intensity'], row['energy_values'], prominence, max_peaks), axis=1)
     
-    print(f"Processing {input_file} with {len(df)} spectra")
-
-    df['z'] = df['z'].map(np.array)#.map(smooth_z)
-    df['peaks'] = df['z'].map(lambda z: extract_peaks(z, prominence, max_peaks))
-    df['skew'] = df['peaks'].map(lambda peaks: calculate_skew(peaks))
-    df = df[(df['power'] >= 4.0) | (df['power'].isna())]
-
-    df.to_json(os.path.join(output_dir, "stats.json"), orient="records", indent=4)
-    print(f"Saved {len(df)} spectra to stats.json")
-    
-    print("df of stats.json:")
-    print(df)
-
     peak_data = df.apply(flatten_peak_features, axis=1)
-    peak_columns = [
-        f"peak_{i}_{feature}"
-        for i in range(1, 16)
-        for feature in ["center", "amplitude", "fwhm"]
-    ]
-    peak_df = pd.DataFrame(peak_data.tolist(), columns=peak_columns)
 
-    print("df of training.json:")
-    print(peak_df)
+    cols = [f"peak_{i}_{feat}" for i in range(1, max_peaks + 1) for feat in ["center", "amplitude"]]
+    peak_df = pd.DataFrame(peak_data.tolist(), columns=cols)
+
+    required_cols = ["id", "qd_id", "target_label"]
+    missing = [col for col in required_cols if col not in df.columns]
+    if missing:
+        sys.exit(f"Missing required columns in input JSON: {missing}")
+
+    training_df = df[required_cols].join(peak_df)
+    training_df.to_json(output_file, orient="records", indent=4)
+    print(training_df)
     
-    training_df = df[[
-      "id", 
-      "qd_id", 
-      "target_label", 
-      # "power", 
-      # "rotator", 
-      "skew"
-    ]].join(peak_df)
+    label_counts = training_df['target_label'].value_counts()
+    print("Counts of unique target labels:")
+    print(label_counts)
+    
+    print(f"Saved {len(training_df)} spectra to {output_file}")
 
-    training_df.to_json(os.path.join(output_dir, "training.json"), orient="records", indent=4)
-    print(f"Saved {len(training_df)} spectra to training.json")
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="Process spectra JSON and extract peak features.")
+    parser.add_argument("input_file", help="Path to the input JSON file")
+    parser.add_argument("output_file", help="Output JSON file path")
+    parser.add_argument("--prominence", type=float, default=0.1, help="Prominence factor for peak detection")
+    parser.add_argument("--max_peaks", type=int, default=15, help="Max number of peaks to extract")
+    parser.add_argument("--smooth", action="store_true", help="Smooth intensity data before peak extraction")
+    args = parser.parse_args()
+    main(args.input_file, args.output_file, args.prominence, args.max_peaks, args.smooth)
