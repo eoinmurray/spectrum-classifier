@@ -1,4 +1,3 @@
-rm -rf data/model data/stats
-uv run src/cli.py convert
-uv run src/cli.py split
-uv run src/cli.py train
+uv run src/convert.py data/raw/ data/model/dataset.json
+uv run src/extract.py data/model/dataset.json data/model/training.json
+uv run src/train.py data/model/training.json data/model
