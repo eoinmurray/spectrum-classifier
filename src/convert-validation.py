@@ -75,12 +75,11 @@ def convert_data(input_dir: str, shape: Tuple[int, int]=(23, 2046)) -> pd.DataFr
     """
     Searches for lab files in input_dir and returns a DataFrame of spectra.
     """
-    power_files = glob.glob(os.path.join(input_dir, "**", "*power*.dat"), recursive=True)
-    rotator_files = glob.glob(os.path.join(input_dir, "**", "*rotator*.dat"), recursive=True)
-    total_files = len(power_files) + len(rotator_files)
+    power_files = glob.glob(os.path.join(input_dir, "**", "*single*.dat"), recursive=True)
+    total_files = len(power_files)
     print(f"Found {total_files} lab files in '{input_dir}'.")
 
-    spectrums = process_files(power_files, shape) + process_files(rotator_files, shape)
+    spectrums = process_files(power_files, shape)
     df = pd.DataFrame(spectrums)
     print("Conversion complete. DataFrame preview:")
     print(df.head())
@@ -88,8 +87,8 @@ def convert_data(input_dir: str, shape: Tuple[int, int]=(23, 2046)) -> pd.DataFr
 
 def main():
     # --- Parameters (update these paths and settings as needed) ---
-    INPUT_DIR = "./data/lab_files"  # Directory containing lab files
-    OUTPUT_DIR = f"./data/converted/"
+    INPUT_DIR = "./datasets/validation-labfiles"  # Directory containing lab files
+    OUTPUT_DIR = f"./datasets/converted-validation/"
 
     if not os.path.exists(OUTPUT_DIR):
       os.makedirs(OUTPUT_DIR)

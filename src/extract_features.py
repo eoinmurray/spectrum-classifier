@@ -3,8 +3,8 @@ from scipy.signal import find_peaks
 from matplotlib import pyplot as plt
 
 # Global parameters
-MAX_PEAKS = 10         # Maximum number of peaks to use as features
-PROMINENCE = 0.01      # Prominence value for peak detection
+MAX_PEAKS = 15          # Maximum number of peaks to use as features
+PROMINENCE = 0.001      # Prominence value for peak detection
 
 def extract_features(energy, intensity):
     peaks, _ = find_peaks(intensity, prominence=PROMINENCE)
@@ -43,9 +43,8 @@ def extract_features(energy, intensity):
     for rel_center, amplitude in zip(relative_top, amplitudes_top):
         features.extend([rel_center, amplitude])
 
-    plt.plot(energy - main_peak_energy, intensity)
-    plt.plot(relative_centers_sorted, amplitudes_sorted, 'x')
-    plt.show()
-    
+    # plt.plot(energy - main_peak_energy, intensity)
+    # plt.plot(relative_centers_sorted, amplitudes_sorted, 'x')
+    # plt.show()
     
     return features

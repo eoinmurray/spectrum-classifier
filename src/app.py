@@ -4,7 +4,7 @@ from joblib import load
 from extract_features import extract_features  # Import common logic
 
 # Load the trained model from the "data" directory.
-model = load("model.joblib")
+model = load("models/model.joblib")
 
 def predict_spectrum(file_obj):
     """
@@ -14,7 +14,10 @@ def predict_spectrum(file_obj):
     try:
         # Gradio passes a file object with a 'name' attribute.
         filepath = file_obj.name if hasattr(file_obj, "name") else file_obj
-        data = np.loadtxt(filepath, delimiter=',')
+        try:
+            data = np.loadtxt(filepath, delimiter=',')
+        except ValueError:
+            data = np.loadtxt(filepath, delimiter='\t')
     except Exception as e:
         return f"Error reading file: {e}"
 

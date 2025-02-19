@@ -9,7 +9,7 @@ from joblib import dump
 from extract_features import extract_features  # Import common logic
 
 # Set the data directory for spectra and model saving
-spectra_dir = "data/converted"
+spectra_dir = "datasets/converted-training"
 
 file_pattern = os.path.join(spectra_dir, "SQ-*.txt")
 files = glob.glob(file_pattern)
@@ -71,6 +71,12 @@ print("\nClassification Report:\n", classification_report(y, y_pred))
 clf.fit(X, y)
 
 # Save the trained model to the "data" directory.
-model_filename = "model.joblib"
+
+model_dir = "models"
+
+if not os.path.exists(model_dir):
+    os.makedirs(model_dir)
+
+model_filename = os.path.join(model_dir, "model.joblib")
 dump(clf, model_filename)
 print(f"Model saved to {model_filename}")

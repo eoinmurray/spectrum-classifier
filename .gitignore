@@ -6,7 +6,7 @@ node_modules/
 yarn-error.log
 *.pth
 
-data/
+datasets/
 
 ipynb_checkpoints
 metabase*
