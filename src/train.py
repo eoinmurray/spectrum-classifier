@@ -6,7 +6,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import StratifiedKFold, cross_val_score, cross_val_predict
 from sklearn.metrics import classification_report
 from joblib import dump
-from spectrum_utils import extract_features  # Import common logic
+from extract_features import extract_features  # Import common logic
 
 # Set the data directory for spectra and model saving
 spectra_dir = "data/converted"
@@ -71,6 +71,6 @@ print("\nClassification Report:\n", classification_report(y, y_pred))
 clf.fit(X, y)
 
 # Save the trained model to the "data" directory.
-model_filename = "spectrum_classifier.joblib"
+model_filename = "model.joblib"
 dump(clf, model_filename)
 print(f"Model saved to {model_filename}")

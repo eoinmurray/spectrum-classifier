@@ -1,10 +1,10 @@
 import gradio as gr
 import numpy as np
 from joblib import load
-from spectrum_utils import extract_features  # Import common logic
+from extract_features import extract_features  # Import common logic
 
 # Load the trained model from the "data" directory.
-model = load("spectrum_classifier.joblib")
+model = load("model.joblib")
 
 def predict_spectrum(file_obj):
     """
@@ -20,7 +20,7 @@ def predict_spectrum(file_obj):
 
     # Ensure the data is 2D (handle single-line case)
     if data.ndim == 1:
-        data = data.reshape(-1, 2)
+        raise ValueError("Invalid data format: Expected 2D array")
 
     energy = data[:, 0]
     intensity = data[:, 1]
