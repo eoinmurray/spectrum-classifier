@@ -37,7 +37,7 @@ def extract_features(energy, intensity):
         pad_length = MAX_PEAKS - len(relative_top)
         relative_top = np.pad(relative_top, (0, pad_length), constant_values=0)
         amplitudes_top = np.pad(amplitudes_top, (0, pad_length), constant_values=0)
-    
+
     # Combine into a flat feature vector: [relative_center1, amplitude1, ..., relative_center_MAX_PEAKS, amplitude_MAX_PEAKS]
     features = []
     for rel_center, amplitude in zip(relative_top, amplitudes_top):

@@ -75,11 +75,12 @@ def main():
 
     # Create a DataFrame from the records and print it.
     df = pd.DataFrame(records)
-    df = df[df['ground_truth'] != '4']
     
-    match_stats = df['match'].value_counts(normalize=True) * 100
-    print("Match statistics (as percentage):")
-    print(match_stats)
+    # Print statistics per ground_truth
+    stats_per_ground_truth = df.groupby('ground_truth')['match'].value_counts(normalize=True).unstack().fillna(0) * 100
+    print("Statistics per ground_truth (as percentage):")
+    print(stats_per_ground_truth)
+    
 
 if __name__ == "__main__":
     main()
