@@ -43,8 +43,4 @@ def extract_features(energy, intensity):
     for rel_center, amplitude in zip(relative_top, amplitudes_top):
         features.extend([rel_center, amplitude])
 
-    # plt.plot(energy - main_peak_energy, intensity)
-    # plt.plot(relative_centers_sorted, amplitudes_sorted, 'x')
-    # plt.show()
-    
-    return features
+    return features, [main_peak_energy, relative_top, amplitudes_top]

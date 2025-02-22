@@ -88,12 +88,12 @@ def convert_data(input_dir: str) -> pd.DataFrame:
 
 def main():
     # --- Parameters (update these paths and settings as needed) ---
-    INPUT_DIR = "./datasets/training-labfiles"  # Directory containing lab files
-    OUTPUT_DIR = f"./datasets/converted-training/"
-    GLOB_PATTERNS = ["**/*power*.dat", "**/*rotator*.dat"]
-    # INPUT_DIR = "./datasets/validation-labfiles"  # Directory containing lab files
-    # OUTPUT_DIR = f"./datasets/converted-validation/"
-    # GLOB_PATTERNS = ["**/*single*.dat"]
+    # INPUT_DIR = "./datasets/training-labfiles"  # Directory containing lab files
+    # OUTPUT_DIR = f"./datasets/converted-training/"
+    # GLOB_PATTERNS = ["**/*power*.dat", "**/*rotator*.dat"]
+    INPUT_DIR = "./datasets/validation-labfiles"  # Directory containing lab files
+    OUTPUT_DIR = f"./datasets/converted-validation/"
+    GLOB_PATTERNS = ["**/*single*.dat"]
 
     if not os.path.exists(OUTPUT_DIR):
       os.makedirs(OUTPUT_DIR)

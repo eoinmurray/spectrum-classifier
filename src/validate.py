@@ -37,7 +37,7 @@ def predict_spectrum(filepath):
     energy = data[:, 0]
     intensity = data[:, 1]
 
-    features = extract_features(energy, intensity)
+    features, _ = extract_features(energy, intensity)
     # Reshape features for prediction (model expects a 2D array)
     features_array = np.array(features).reshape(1, -1)
     prediction = model.predict(features_array)
