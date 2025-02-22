@@ -6,7 +6,7 @@ from joblib import load
 from extract_features import extract_features  # Import common logic
 
 # Load the trained model from the "models" directory.
-model = load("models/model.joblib")
+model = load("models/model-1.joblib")
 
 def extract_ground_truth(filename):
     """
