@@ -1,0 +1,11 @@
+label1_
+#1 [X+ (X20+) intensity is <75% of X (X10)]
+#2 [X+ (X20+) intensity is >75% of X (X10)] AND [X (X10) intensity not <25% ox X+ (X20+)]
+#3 [X (X10) intensity <25% of X+ (X20+)], double charged trion X++ (5peaks) becomes significant
+#4 [anything else broad, or unrecognized]
+
+
+label2_
+#1 [X (X10) intensity is >= X+ (X20+) ]
+#2 [X+ (X20+) intensity is > X (X10)] AND [X (X10) still visible, >~10-15% of X+]
+#4 [anything else broad, or unrecognized; double charged trion X++ (5peaks) becomes significant]
