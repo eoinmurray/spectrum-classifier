@@ -26,7 +26,7 @@ def predict_spectrum(filepath):
     and returns the predicted class.
     """
     try:
-        data = np.loadtxt(filepath, delimiter=',')
+        data = np.loadtxt(filepath, delimiter=',', skiprows=1)
     except Exception as e:
         raise ValueError(f"Error reading file {filepath}: {e}")
 

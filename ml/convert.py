@@ -2,7 +2,7 @@ import os
 import glob
 import random
 import string
-from typing import Any, Dict, Tuple, List
+from typing import Any, Dict, List
 import numpy as np
 import pandas as pd
 import shutil
@@ -132,7 +132,8 @@ def main():
         id = row["id"]
 
         data = np.column_stack((energy, intensity))
-        np.savetxt(f"./{OUTPUT_DIR}/{quantum_dot_id}_label_{label}_id_{id}.txt", data, delimiter=",")
+        header = "energy,intensity"
+        np.savetxt(f"./{OUTPUT_DIR}/{quantum_dot_id}_label_{label}_id_{id}.txt", data, delimiter=",", header=header, comments='')
         
     print("Step 2: Conversion complete. Data saved to disk.")
 

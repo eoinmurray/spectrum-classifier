@@ -1,8 +1,6 @@
-FROM python:3.10-slim
+FROM python:3.12-slim-bookworm
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+ADD . /app
 WORKDIR /app
-COPY . .
 RUN uv sync --frozen
-EXPOSE 7860
-ENV GRADIO_SERVER_NAME="0.0.0.0"
-CMD ["uv", "run", "src/app.py"]
+CMD ["uv", "run", "ml/api.py"]
