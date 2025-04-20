@@ -61,10 +61,10 @@ def main():
 
     model_filename = os.path.join(model_dir, "model-1.joblib")
 
-    print(f"Reading spectra from {spectra_dir}")
-
-    file_pattern = os.path.join(spectra_dir, "SQ-*.txt")
+    file_pattern = os.path.join(spectra_dir, "*.txt")
     files = glob.glob(file_pattern)
+
+    print(f"Reading {len(files)} spectra from {spectra_dir}")
 
     # Lists to hold features and labels
     features_list = []
@@ -79,6 +79,7 @@ def main():
         if label_match:
             label = int(label_match.group(1))
         else:
+            print(f"Could not extract label from filename: {file}")
             continue  # Skip file if no label is found.
 
         # Read the comma-delimited spectrum data (energy and intensity).

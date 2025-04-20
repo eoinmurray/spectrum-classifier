@@ -3,7 +3,7 @@ import re
 import numpy as np
 import pandas as pd
 from joblib import load
-from extract_features import extract_features  # Import common logic
+from train import extract_features  # Import common logic
 
 # Load the trained model from the "models" directory.
 model = load("models/model-1.joblib")
@@ -44,7 +44,7 @@ def predict_spectrum(filepath):
     return prediction[0]
 
 def main():
-    validation_dir = "datasets/converted-validation"
+    validation_dir = "datasets/converted-validation2"
     records = []
 
     # Iterate over all TXT files in the validation directory.

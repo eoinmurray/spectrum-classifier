@@ -1,3 +1,5 @@
+import shutil
+import re
 import os
 import glob
 import random
@@ -86,15 +88,7 @@ def convert_data(input_dir: str) -> pd.DataFrame:
     print(df.head())
     return df
 
-def main():
-    # --- Parameters (update these paths and settings as needed) ---
-    # INPUT_DIR = "./datasets/training-labfiles"  # Directory containing lab files
-    # OUTPUT_DIR = f"./datasets/converted-training/"
-    # GLOB_PATTERNS = ["**/*power*.dat", "**/*rotator*.dat"]
-    INPUT_DIR = "./datasets/validation-labfiles"  # Directory containing lab files
-    OUTPUT_DIR = f"./datasets/converted-validation/"
-    GLOB_PATTERNS = ["**/*single*.dat"]
-
+def convert_type1(INPUT_DIR, OUTPUT_DIR, GLOB_PATTERNS):
     if not os.path.exists(OUTPUT_DIR):
       os.makedirs(OUTPUT_DIR)
     else:
@@ -137,5 +131,78 @@ def main():
         
     print("Step 2: Conversion complete. Data saved to disk.")
 
-if __name__ == "__main__":
-    main()
+
+def convert_type2(INPUT_DIR, OUTPUT_DIR, GLOB_PATTERNS):
+    if not os.path.exists(OUTPUT_DIR):
+      os.makedirs(OUTPUT_DIR)
+    else:
+      if os.listdir(OUTPUT_DIR):
+        shutil.rmtree(OUTPUT_DIR)
+        os.makedirs(OUTPUT_DIR)
+
+    print("Step 1: Converting lab files to spectra (in memory)...")
+
+    # power_files = glob.glob(os.path.join(INPUT_DIR, "**", "*power*.dat"), recursive=True)
+    # rotator_files = glob.glob(os.path.join(INPUT_DIR, "**", "*rotator*.dat"), recursive=True)
+    
+    files = []
+    for pattern in GLOB_PATTERNS:
+        files.extend(glob.glob(os.path.join(INPUT_DIR, pattern), recursive=True))
+    
+    total_files = len(files)
+    print(f"Found {total_files} lab files in '{INPUT_DIR}'.")
+
+    for file in files:
+        match = re.search(r'_label#(.*?).dat.txt', file)
+        if match:
+            label = match.group(1)
+            new_filename = f"./{OUTPUT_DIR}/v2_label_{label}_id_{generate_random_id()}.txt"
+            shutil.copy(file, new_filename)
+
+
+        else:
+            print(ValueError(f"Could not extract label from filename: {file}"))
+
+
+    # spectrums = process_files(files, "label2_#")
+    # converted_df = pd.DataFrame(spectrums)
+    # print("Conversion complete. DataFrame preview:")
+    # print(converted_df.sample(10))
+
+    # if converted_df.empty:
+    #     print(f"No lab files found in '{INPUT_DIR}'. Exiting.")
+    #     return
+
+    # print("Step 2: Saving spectra to disk...")
+    # for index, row in converted_df.iterrows():
+    #     intensity = row["intensity"]
+    #     energy = row["energy"]
+    #     label = row["label"]
+    #     quantum_dot_id = row["quantum_dot_id"]
+    #     id = row["id"]
+
+    #     data = np.column_stack((energy, intensity))
+    #     header = "energy,intensity"
+    # np.savetxt(f"./{OUTPUT_DIR}/{quantum_dot_id}_label_{label}_id_{id}.txt", data, delimiter=",", header=header, comments='')
+        
+    print("Step 2: Conversion complete. Data saved to disk.")
+
+
+if __name__ == "__main__":    
+    convert_type1(
+        "./datasets/training-labfiles",
+        "./datasets/converted-training/",
+        ["**/*power*.dat", "**/*rotator*.dat"]
+    )
+
+    convert_type1(
+        "./datasets/validation-labfiles", 
+        "./datasets/converted-validation/", 
+        ["**/*single*.dat"]
+    )
+
+    convert_type2(
+        "./datasets/validation2-labfiles", 
+        "./datasets/converted-validation2/", 
+        ["**.txt"]
+    )
